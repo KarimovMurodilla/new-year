@@ -1,0 +1,12 @@
+[Unit]
+After=network.target
+Description=NewYearBot
+
+[Service]
+Type=simple
+WorkingDirectory=/root/new-year/
+ExecStart=/usr/bin/python3 app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+from aiogram import types
+from aiogram.dispatcher import FSMContext
+
+from keyboards.inline import inline_buttons
+from keyboards.default import keyboard_buttons
+
+from loader import dp
+
+
+@dp.message_handler(state="*", text = 'Отмена')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    await state.finish()
+    await message.answer("Отменено!", reply_markup=keyboard_buttons.main_menu())
+
+
+@dp.message_handler(state="*", content_types=types.ContentTypes.PHOTO)
+async def photo(message: types.Message):
+    print(message.photo[-1].file_id)
