@@ -14,7 +14,9 @@ session = Session()
 
 Base.metadata.create_all(db)
 
+
 class Database:
+    # ---Users---
     def reg_user(self, user_id: str, username: str):
         """Some docs"""
         session.merge(Users(user_id = user_id, 
@@ -22,20 +24,25 @@ class Database:
         session.commit()
     
 
-    def reg_new_concat(self, type: str, file_id: str, wishes: str, bot_name, name = None, age = None, hobbies = None, male = None):
+    # All concat
+    def reg_new_concat(self, user_id: int, type: str, wishes: str, bot_name: str, file_id: str, name = None, age = None, hobbies = None, male = None):
         """Some docs"""
         session.merge(Concats(
-            name = name, 
-            age = age,
-            hobbies = hobbies,
-            wishes = wishes,
-            type = type,
-            file_id = file_id
+                user_id = user_id,
+                name = name,
+                age = age,
+                hobbies = hobbies,
+                wishes = wishes,
+                type = type,
+                file_id = file_id,
+                bot_name = bot_name,
+                male = male
             )
         )
         session.commit()       
     
 
+    # ---Many child---
     def get_concat_many(self, wishes, bot_name) -> Concats:
         """Some docs"""
         response = session.query(Concats).filter(
@@ -44,6 +51,17 @@ class Database:
         ).first()
 
         return response
+
+
+    # ---One child---
+    def update_video_file_id(self, user_id, file_id):
+        """Some changes"""
+        session.execute(
+                update(Concats).filter(Concats.user_id == user_id).
+                values(file_id = file_id)
+        )
+        session.commit()
+
 
 
     def get_concat_one(self, name, male, age, hobbies, wishes, bot_name) -> Concats:
@@ -56,6 +74,15 @@ class Database:
             Concats.hobbies == hobbies,
             Concats.wishes == wishes,
             Concats.bot_name == bot_name
+        ).first()
+
+        return response
+
+
+    def get_concat_one_by_id(self, user_id) -> Concats:
+        """Some docs"""
+        response = session.query(Concats).filter(
+            Concats.user_id == user_id
         ).first()
 
         return response

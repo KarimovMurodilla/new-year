@@ -6,7 +6,7 @@ from aiogram.dispatcher import FSMContext
 from keyboards.inline import inline_buttons
 from utils.misc import cyrillic_checker
 from states.reg import RegOneChild
-from loader import dp, vid, db, bot, user_bot
+from loader import dp, vid, db, bot
 
 
 @dp.callback_query_handler(text_contains = 'one_child', state="*")
@@ -114,30 +114,34 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
 
                     "Поделиться новогодним чудом с друзьями:"
         )
+        await state.finish()
 
-    user_id = c.from_user.id
-    vid.generate_video_for_one_child(user_id, name, male, age, hobbies, wishes)
+    else:
+        user_id = c.from_user.id
+        vid.generate_video_for_one_child(user_id, name, male, age, hobbies, wishes)
+        await msg.delete()
 
-    await msg.edit_text("Отправляем...")
-    result = await user_bot.send_large(user_id, bot_info.username)
-    await c.message.answer_video(
-        video = result.video.file_id,
-        caption = f"Поздравление для {name}\n"
-                    "Скорее запускайте и смотрите!\n\n"
+        with open(f'staticfiles/videos/final/{user_id}.mp4', 'rb') as video:
+            sended = await c.message.answer_video(
+                video = video,
+                caption = f"Поздравление для {name}\n"
+                            "Скорее запускайте и смотрите!\n\n"
 
-                    "Поделиться новогодним чудом с друзьями:"
-    )
-    await msg.delete()
+                            "Поделиться новогодним чудом с друзьями:"
+            )
 
-    os.remove(f'staticfiles/videos/final/{c.from_user.id}.mp4')
+        os.remove(f'staticfiles/videos/final/{user_id}.mp4')
 
-    db.reg_new_concat(
-        type = 'one',
-        file_id = result.video.file_id,
-        wishes = wishes,
-        bot_name = bot_info.username,
-        name = name,
-        age = age,
-        hobbies = hobbies,
-        male = male
-    )
+        db.reg_new_concat(
+            user_id = user_id,
+            type = 'one',
+            wishes = wishes,
+            file_id = sended.video.file_id,
+            bot_name = bot_info.username,
+            name = name,
+            age = age,
+            hobbies = hobbies,
+            male = male
+        )
+
+        await state.finish()

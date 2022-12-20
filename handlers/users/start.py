@@ -1,9 +1,8 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import CommandStart
-from aiogram.utils.deep_linking import get_start_link
 
-from loader import dp, db, bot, user_bot
+from loader import dp, db
 from keyboards.default import keyboard_buttons
 from keyboards.inline import inline_buttons
 

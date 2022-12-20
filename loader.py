@@ -5,10 +5,11 @@ from data import config
 from utils.misc.connection import Database
 
 from utils.misc.edit.video_edit import VideoEdit
-from utils.userbot.large_file_sender import UserBot
+from aiogram.bot.api import TelegramAPIServer
 
-
-bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+# AIOgram
+local_server = TelegramAPIServer.from_base('http://localhost:8081')
+bot = Bot(token='API_TOKEN', server=local_server, parse_mode=types.ParseMode.HTML)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
@@ -19,7 +20,3 @@ db = Database()
 
 # Video
 vid = VideoEdit()
-
-
-# User Bot
-user_bot = UserBot()

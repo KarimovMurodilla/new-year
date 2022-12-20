@@ -11,3 +11,5 @@ ADMINS = env.list("ADMINS")  # Тут у нас будет список из а�
 # User Bot
 API_ID = env.str("API_ID")
 API_HASH = env.str("API_HASH")
+
+USER_ID = env.str("USER_ID")

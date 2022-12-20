@@ -1,0 +1,12 @@
+[Unit]
+After=network.target
+Description=I am 🐍 psss!
+
+[Service]
+Type=simple
+WorkingDirectory=/root/new-year/
+ExecStart=/root/telegram-bot-api/bin/telegram-bot-api --local --api-id=29643706 --api-hash=7d299427118a943cd4684c1c9ea07539
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
