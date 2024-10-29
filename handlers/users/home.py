@@ -14,6 +14,6 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.answer("Отменено!", reply_markup=keyboard_buttons.main_menu())
 
 
-@dp.message_handler(state="*", content_types=types.ContentTypes.VIDEO)
+@dp.message_handler(state="*", content_types=types.ContentTypes.PHOTO)
 async def photo(message: types.Message):
-    pass
+    print(message.photo[-1].file_id)
