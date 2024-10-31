@@ -58,7 +58,7 @@ def get_congrats():
 def m_or_w():
     menu = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text="Мужское", callback_data="man")
-    btn1 = types.InlineKeyboardButton(text="Женское", callback_data="woman")
-    menu.add(btn1)
+    btn2 = types.InlineKeyboardButton(text="Женское", callback_data="woman")
+    menu.add(btn1, btn2)
 
-    return menu    
+    return menu

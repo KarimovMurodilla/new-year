@@ -118,6 +118,7 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
 
     else:
         user_id = c.from_user.id
+        vid.name_m.keys
         vid.generate_video_for_one_child(user_id, name, male, age, hobbies, wishes)
         await msg.delete()
 
