@@ -6,7 +6,7 @@ from aiogram.dispatcher import FSMContext
 from keyboards.inline import inline_buttons
 from utils.misc import cyrillic_checker
 from states.reg import RegOneChild
-from loader import dp, vid, db, bot
+from loader import dp, vid, db, bot, BASE_DIR
 
 
 @dp.callback_query_handler(text_contains = 'one_child', state="*")
@@ -40,8 +40,40 @@ async def process_get_name(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(state=RegOneChild.additive)
 async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
+    m_names = {
+        'Саша': 'Александр',
+        'Сашенька': 'Александр',
+        'Шура': 'Александр',
+        'Шурочка': 'Александр',
+        'Валя': 'Валентин',
+        'Валечка': 'Валентин',
+        'Валюша': 'Валентин',
+        'Вася': 'Василий',
+        'Женя': 'Евгений',
+        'Женечка': 'Евгений'
+    }
+
+    f_names = {
+        'Саша': 'Александра',
+        'Сашенька': 'Александра',
+        'Шура': 'Александра',
+        'Шурочка': 'Александра',
+        'Валя': 'Валентина',
+        'Валечка': 'Валентина',
+        'Валюша': 'Валентина',
+        'Вася': 'Василиса',
+        'Женя': 'Евгения',
+        'Женечка': 'Евгения'
+    }
+
     async with state.proxy() as data:
-        data['male'] = c.data
+        data['gender'] = c.data
+
+        if c.data == 'male':
+            data['name'] = m_names[data['name']]
+
+        else:
+            data['name'] = f_names[data['name']]
 
     await c.message.delete()
     await c.message.answer("Введите возраст:")
@@ -84,8 +116,7 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
     await RegOneChild.next()
 
 
-@dp.callback_query_handler(state=RegOneChild.step5)
-async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
+async def show_process(c: types.CallbackQuery):
     for i in range(11):
         msg = await c.message.edit_text(
             "Минуточку, Дедушка Мороз записывает видеопоздравление.\n"
@@ -93,18 +124,25 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
         )
         await asyncio.sleep(0.5)
 
+    await msg.delete()
+    return msg   
+    
+@dp.callback_query_handler(state=RegOneChild.step5)
+async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
+    task = asyncio.create_task(show_process(c))
+
     async with state.proxy() as data:
         name = data.get('name')
-        male = data.get('male')
+        gender = data.get('gender')
         age = data.get('age')
         hobbies = data.get('hobbies')
         wishes = data.get('wishes')
 
-        if not male:
-            male = 'man' if name in vid.name_m.keys() else 'woman'
+        if not gender:
+            gender = 'male' if name in vid.name_m.keys() else 'female'
 
     bot_info = await bot.get_me()
-    response = db.get_concat_one(name, male, age, hobbies, wishes, bot_info.username)
+    response = db.get_concat_one(name, gender, age, hobbies, wishes, bot_info.username)
     
     if response:
         await c.message.answer_video(
@@ -118,31 +156,30 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
 
     else:
         user_id = c.from_user.id
-        vid.name_m.keys
-        vid.generate_video_for_one_child(user_id, name, male, age, hobbies, wishes)
-        await msg.delete()
+        vid.generate_video_for_one_child(BASE_DIR, user_id, name, gender, age, hobbies, wishes)
 
-        with open(f'staticfiles/videos/final/{user_id}.mp4', 'rb') as video:
-            sended = await c.message.answer_video(
-                video = video,
-                caption = f"Поздравление для {name}\n"
-                            "Скорее запускайте и смотрите!\n\n"
+        if await task:
+            with open(f'{BASE_DIR}/staticfiles/videos/final/{user_id}.mp4', 'rb') as video:
+                sended = await c.message.answer_video(
+                    video = video,
+                    caption =  f"Поздравление для {name}\n"
+                                "Скорее запускайте и смотрите!\n\n"
 
-                            "Поделиться новогодним чудом с друзьями:"
+                                "Поделиться новогодним чудом с друзьями:"
+                )
+
+            os.remove(f'{BASE_DIR}/staticfiles/videos/final/{user_id}.mp4')
+
+            db.reg_new_concat(
+                user_id = user_id,
+                type = 'one',
+                wishes = wishes,
+                file_id = sended.video.file_id,
+                bot_name = bot_info.username,
+                name = name,
+                age = age,
+                hobbies = hobbies,
+                gender = gender
             )
 
-        os.remove(f'staticfiles/videos/final/{user_id}.mp4')
-
-        db.reg_new_concat(
-            user_id = user_id,
-            type = 'one',
-            wishes = wishes,
-            file_id = sended.video.file_id,
-            bot_name = bot_info.username,
-            name = name,
-            age = age,
-            hobbies = hobbies,
-            male = male
-        )
-
-        await state.finish()
+            await state.finish()

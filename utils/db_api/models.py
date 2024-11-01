@@ -17,7 +17,7 @@ class Concats(Base):
     id = Column(Integer(), primary_key=True)
     user_id = Column(Integer())
     name = Column(String(50))
-    male = Column(String(10))
+    gender = Column(String(10))
     age = Column(Integer())
     hobbies = Column(String(50))
     wishes = Column(String(50))

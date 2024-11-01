@@ -5,7 +5,7 @@ from aiogram.dispatcher import FSMContext
 
 from keyboards.inline import inline_buttons
 from states.reg import RegManyChild
-from loader import dp, vid, db, bot
+from loader import dp, vid, db, bot, BASE_DIR
 
 
 @dp.callback_query_handler(text_contains = 'many_child', state="*")
@@ -40,9 +40,10 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
 
     bot_name = await bot.get_me()
     response = db.get_concat_many(wishes, bot_name.username)
+    print("Response:", response)
 
     if response:
-        await c.message.answer_video(
+        return await c.message.answer_video(
             video = response.file_id, 
             caption= "Поздравление от Дедушки Мороза\n"
                     "В словарном запасе Дедушки мороза не было имени, которое вы назвали. Но он всё равно записал новогоднее поздравление. Нажмите на видео, чтобы посмотреть.\n\n"
@@ -50,10 +51,10 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
                     "Поделиться новогодним чудом с друзьями:"
         )
 
-    vid.generate_video_for_many_child(wishes, c.from_user.id)
+    vid.generate_video_for_many_child(BASE_DIR, wishes, c.from_user.id)
 
     await msg.edit_text("Отправляем...")
-    with open(f"staticfiles/videos/final/{c.from_user.id}.mp4", 'rb') as video:
+    with open(f"{BASE_DIR}/staticfiles/videos/final/{c.from_user.id}.mp4", 'rb') as video:
         await msg.delete()
         result = await c.message.answer_video(
             video = video, 
@@ -63,11 +64,12 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
                     "Поделиться новогодним чудом с друзьями:"
         )
 
-    os.remove(f'staticfiles/videos/final/{c.from_user.id}.mp4')
+    os.remove(f'{BASE_DIR}/staticfiles/videos/final/{c.from_user.id}.mp4')
 
     db.reg_new_concat(
+        user_id=c.from_user.id,
         type = 'many',
         file_id = result.video.file_id,
         wishes = wishes,
-        bot_name = bot_name
+        bot_name = bot_name.username
     )

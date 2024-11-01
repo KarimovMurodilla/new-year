@@ -25,7 +25,7 @@ class Database:
     
 
     # All concat
-    def reg_new_concat(self, user_id: int, type: str, wishes: str, bot_name: str, file_id: str, name = None, age = None, hobbies = None, male = None):
+    def reg_new_concat(self, user_id: int, type: str, wishes: str, bot_name: str, file_id: str, name = None, age = None, hobbies = None, gender = None):
         """Some docs"""
         session.merge(Concats(
                 user_id = user_id,
@@ -36,7 +36,7 @@ class Database:
                 type = type,
                 file_id = file_id,
                 bot_name = bot_name,
-                male = male
+                gender = gender
             )
         )
         session.commit()       
@@ -46,6 +46,7 @@ class Database:
     def get_concat_many(self, wishes, bot_name) -> Concats:
         """Some docs"""
         response = session.query(Concats).filter(
+            Concats.type == 'many',
             Concats.wishes == wishes,
             Concats.bot_name == bot_name
         ).first()
@@ -64,12 +65,12 @@ class Database:
 
 
 
-    def get_concat_one(self, name, male, age, hobbies, wishes, bot_name) -> Concats:
+    def get_concat_one(self, name, gender, age, hobbies, wishes, bot_name) -> Concats:
         """Some docs"""
         response = session.query(Concats).filter(
             Concats.type == 'one',
             Concats.name == name,
-            Concats.male == male,
+            Concats.gender == gender,
             Concats.age == age,
             Concats.hobbies == hobbies,
             Concats.wishes == wishes,

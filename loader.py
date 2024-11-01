@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
@@ -10,15 +12,16 @@ from aiogram.bot.api import TelegramAPIServer
 from data.config import BOT_TOKEN
 
 # AIOgram
-# local_server = TelegramAPIServer.from_base('http://localhost:8081')
+local_server = TelegramAPIServer.from_base('http://localhost:8081')
 bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-
 # DB
 db = Database()
 
-
 # Video
 vid = VideoEdit()
+
+# Path
+BASE_DIR = Path(__file__).parent.resolve()

@@ -59,8 +59,8 @@ class VideoEdit():
             'read_more_books': 'Wishes_05.mp4',
         }
 
-    def generate_video_for_many_child(self, file_name, chat_id):
-        with open('staticfiles/videos/all/files.txt', 'w', encoding='utf-8') as f:
+    def generate_video_for_many_child(self, base_dir, file_name, chat_id):
+        with open(f'{base_dir}/staticfiles/videos/all/files.txt', 'w', encoding='utf-8') as f:
             f.write(
                 'file K_01_constant.mp4\n'
                 f'file {self.many_child_wishes.get(file_name)}\n'
@@ -68,12 +68,12 @@ class VideoEdit():
             )
 
         os.system(
-            f"ffmpeg -y -f concat -safe 0 -i staticfiles/videos/all/files.txt -c copy staticfiles/videos/final/{chat_id}.mp4"
+            f"ffmpeg -y -f concat -safe 0 -i {base_dir}/staticfiles/videos/all/files.txt -c copy staticfiles/videos/final/{chat_id}.mp4"
         )
 
-    def generate_video_for_one_child(self, chat_id, name, male, age, hobbies, wishes):
-        with open('staticfiles/videos/all/files.txt', 'w', encoding='utf-8') as f:
-            if male == 'man':
+    def generate_video_for_one_child(self, base_dir, chat_id, name, male, age, hobbies, wishes):
+        with open(f'{base_dir}/staticfiles/videos/all/files.txt', 'w', encoding='utf-8') as f:
+            if male == 'male':
                 f.write(
                     'file M_01_constant.mp4\n'
                     f'file {self.name_m.get(name)}\n'
@@ -86,7 +86,7 @@ class VideoEdit():
                     'file M_05_constant.mp4'
                 )
 
-            elif male == 'woman':
+            elif male == 'female':
                 f.write(
                     'file W_01_constant.mp4\n'
                     f'file {self.name_w.get(name)}\n'
@@ -100,5 +100,5 @@ class VideoEdit():
                 )
 
         os.system(
-            f"ffmpeg -y -f concat -safe 0 -i staticfiles/videos/all/files.txt -c copy staticfiles/videos/final/{chat_id}.mp4"
+            f"ffmpeg -y -f concat -safe 0 -i {base_dir}/staticfiles/videos/all/files.txt -c copy staticfiles/videos/final/{chat_id}.mp4"
         )
