@@ -4,6 +4,8 @@ env = Env()
 env.read_env()
 
 # Telegram Bot
+DEBUG = env.bool("DEBUG")  # Забираем значение типа bool
+
 BOT_TOKEN = env.str("BOT_TOKEN")  # Забираем значение типа str
 ADMINS = env.list("ADMINS")  # Тут у нас будет список админов
 
