@@ -24,10 +24,9 @@ async def process_get_name(message: types.Message, state: FSMContext):
         'Саша', 'Сашенька', 'Шура', 'Шурочка', 'Валя', 'Валечка', 'Валюша', 'Вася', 'Женя', 'Женечка'
     ]
 
-    m_names = list(vid.name_m.keys())
+    all_names = list(vid.name_m.keys())
     w_names = list(vid.name_w.keys())
-    m_names.extend(w_names)
-    all_names = m_names
+    all_names.extend(w_names)
 
     if not cyrillic_checker.all_ru(message.text):
         await message.answer("Только кириллицей!")
