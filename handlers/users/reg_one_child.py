@@ -4,7 +4,9 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from keyboards.inline import inline_buttons
+from keyboards.default import keyboard_buttons
 from utils.misc import cyrillic_checker
+from utils.misc.payment import YooKassa
 from states.reg import RegOneChild
 from loader import dp, vid, db, bot, BASE_DIR
 
@@ -108,28 +110,105 @@ async def process_get_hobbies(c: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(state=RegOneChild.step4)
 async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
-    await c.answer()
+    await c.message.delete()
 
     async with state.proxy() as data:
         data['wishes'] = c.data
-    await c.message.edit_text("Регистрация завершена, нажмите на кнопку чтобы продолжить:", reply_markup=inline_buttons.get_congrats())
+        
+    await c.message.answer(
+        "Отлично! Для оформления заявки, "
+        "нажимай кнопку - отправить контакт. "
+        "На	него я вышлю видеопоздравление.", 
+            reply_markup=keyboard_buttons.send_contact()
+    )
+    await RegOneChild.next()
+
+@dp.message_handler(content_types="contact", state=RegOneChild.step5)
+async def process_get_phone_number(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['phone_number'] = message.contact.phone_number
+    
+    await message.answer(
+        "Регистрация завершена, нажмите на кнопку чтобы продолжить:",
+        reply_markup=inline_buttons.get_congrats()
+    )
+    await RegOneChild.next()
+
+@dp.callback_query_handler(state=RegOneChild.step6)
+async def process_show_paytypes(c: types.CallbackQuery, state: FSMContext):
+    await c.message.delete()
+
+    await c.message.answer(
+        "У вас есть промокод? "	
+        "(промокод расположен на тыльной "
+        "стороне конверта)",
+            reply_markup=inline_buttons.show_paytypes()
+    )
+
     await RegOneChild.next()
 
 
-async def show_process(c: types.CallbackQuery):
+@dp.callback_query_handler(lambda c: c.data == 'promo', state=RegOneChild.step7)
+async def process_promocode(c: types.CallbackQuery, state: FSMContext):
+    await c.answer()
+
+    await c.message.answer("Отправьте промокод")
+    await RegOneChild.next()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'yookassa', state=RegOneChild.step7)
+async def process_promocode(c: types.CallbackQuery, state: FSMContext):
+    await c.answer()
+
+    kassa = YooKassa()
+    payment_details = kassa.payment_create(value=90, description="For video generation")
+    payment_url = payment_details['confirmation']['confirmation_url']
+    payment_id = payment_details['id']
+
+    await c.message.answer(
+        "Чтобы оплатить, переходите на страницу оплаты по указанной кнопки",
+        reply_markup=inline_buttons.show_yookassa_payment(payment_url)
+    )
+
+    if await kassa.check_payment(payment_id):
+        process_send_result(c, state)
+
+    await RegOneChild.next()
+
+
+@dp.message_handler(state=RegOneChild.step8)
+async def process_get_promocode(message: types.Message, state: FSMContext):
+    promo = db.get_promocode_status(message.text)
+
+    if not promo.status:
+        await process_send_result(message, state)
+        db.update_promo_to_expired(message.text)
+    
+    else:
+        await message.answer(
+            "Промокод недействителен. "
+            "Пожалуйста, проверьте его и "	
+            "попробуйте	снова!",
+            reply_markup=inline_buttons.show_paytypes()
+        )
+        await state.set_state(RegOneChild.step7)
+ 
+
+async def show_process(message: types.Message):
     for i in range(11):
-        msg = await c.message.edit_text(
+        msg = await message.edit_text(
             "Минуточку, Дедушка Мороз записывает видеопоздравление.\n"
             f"{('🟦' * i) + ('◻️' * (10 - i))}"
         )
         await asyncio.sleep(0.5)
 
     await msg.delete()
-    return msg   
-    
-@dp.callback_query_handler(state=RegOneChild.step5)
-async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
-    task = asyncio.create_task(show_process(c))
+    return msg
+
+# @dp.callback_query_handler(state=RegOneChild.step7)
+async def process_send_result(message: types.Message, state: FSMContext):
+    msg = await message.answer("Минуточку, Дедушка Мороз записывает видеопоздравление.")
+    task = asyncio.create_task(show_process(msg))
 
     async with state.proxy() as data:
         name = data.get('name')
@@ -137,15 +216,17 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
         age = data.get('age')
         hobbies = data.get('hobbies')
         wishes = data.get('wishes')
+        phone_number = data.get("phone_number")
 
         if not gender:
             gender = 'male' if name in vid.name_m.keys() else 'female'
 
+    db.reg_user(message.from_user.id, message.from_user.username, phone_number)
     bot_info = await bot.get_me()
     response = db.get_concat_one(name, gender, age, hobbies, wishes, bot_info.username)
     
     if response:
-        await c.message.answer_video(
+        await message.answer_video(
             video = response.file_id, 
             caption= "Поздравление от Дедушки Мороза\n"
                     "В словарном запасе Дедушки мороза не было имени, которое вы назвали. Но он всё равно записал новогоднее поздравление. Нажмите на видео, чтобы посмотреть.\n\n"
@@ -155,12 +236,12 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
         await state.finish()
 
     else:
-        user_id = c.from_user.id
-        vid.generate_video_for_one_child(BASE_DIR, user_id, name, gender, age, hobbies, wishes)
+        user_id = message.from_user.id
+        video_url = vid.generate_video_for_one_child(BASE_DIR, user_id, name, gender, age, hobbies, wishes)
 
         if await task:
-            with open(f'{BASE_DIR}/staticfiles/videos/final/{user_id}.mp4', 'rb') as video:
-                sended = await c.message.answer_video(
+            with open(video_url, 'rb') as video:
+                sended = await message.answer_video(
                     video = video,
                     caption =  f"Поздравление для {name}\n"
                                 "Скорее запускайте и смотрите!\n\n"
@@ -168,7 +249,7 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
                                 "Поделиться новогодним чудом с друзьями:"
                 )
 
-            os.remove(f'{BASE_DIR}/staticfiles/videos/final/{user_id}.mp4')
+            os.remove(video_url)
 
             db.reg_new_concat(
                 user_id = user_id,

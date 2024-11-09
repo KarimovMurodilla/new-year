@@ -68,8 +68,10 @@ class VideoEdit():
             )
 
         os.system(
-            f"ffmpeg -y -f concat -safe 0 -i {base_dir}/staticfiles/videos/all/files.txt -c copy staticfiles/videos/final/{chat_id}.mp4"
+            f"ffmpeg -y -f concat -safe 0 -i {base_dir}/staticfiles/videos/all/files.txt -c copy {base_dir}/staticfiles/videos/final/{chat_id}.mp4"
         )
+
+        return f"{base_dir}/staticfiles/videos/final/{chat_id}.mp4"
 
     def generate_video_for_one_child(self, base_dir, chat_id, name, male, age, hobbies, wishes):
         with open(f'{base_dir}/staticfiles/videos/all/files.txt', 'w', encoding='utf-8') as f:
@@ -102,3 +104,5 @@ class VideoEdit():
         os.system(
             f"ffmpeg -y -f concat -safe 0 -i {base_dir}/staticfiles/videos/all/files.txt -c copy staticfiles/videos/final/{chat_id}.mp4"
         )
+
+        return f'{base_dir}/staticfiles/videos/final/{chat_id}.mp4'

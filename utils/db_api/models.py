@@ -1,6 +1,6 @@
 from distutils.sysconfig import get_makefile_filename
-from sqlalchemy import Column, BigInteger, Integer, String
-
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, Boolean
+from sqlalchemy.sql import func
 from utils.db_api.base import Base
 
 
@@ -9,6 +9,8 @@ class Users(Base):
 
     user_id = Column(BigInteger, primary_key=True, unique=True, autoincrement=False)
     username = Column(String(20))
+    phone_number = Column(String(20))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class Concats(Base):
@@ -24,3 +26,13 @@ class Concats(Base):
     type = Column(String(15))
     file_id = Column(String(150))
     bot_name = Column(String(20))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Promocodes(Base):
+    __tablename__ = "promocodes"
+
+    id = Column(Integer(), primary_key=True)
+    user_id = Column(Integer(), nullable=True)
+    code = Column(String(50))
+    status = Column(Boolean, default=False)

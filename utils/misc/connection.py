@@ -4,7 +4,7 @@ from sqlalchemy import update, delete
 from sqlalchemy.orm import sessionmaker
 
 from utils.db_api.base import Base
-from utils.db_api.models import Concats, Users
+from utils.db_api.models import Concats, Users, Promocodes
 
 db_string = r"sqlite:///database.db"
 db = create_engine(db_string)  
@@ -17,15 +17,36 @@ Base.metadata.create_all(db)
 
 class Database:
     # ---Users---
-    def reg_user(self, user_id: str, username: str):
+    def reg_user(
+        self, 
+        user_id: str,
+        username: str,
+        phone_number: str
+    ):
         """Some docs"""
-        session.merge(Users(user_id = user_id, 
-                            username = username))
+        session.merge(
+            Users(
+                user_id = user_id, 
+                username = username,
+                phone_number = phone_number
+            )
+        )
         session.commit()
     
 
     # All concat
-    def reg_new_concat(self, user_id: int, type: str, wishes: str, bot_name: str, file_id: str, name = None, age = None, hobbies = None, gender = None):
+    def reg_new_concat(
+        self, 
+        user_id: int, 
+        type: str, 
+        wishes: str, 
+        bot_name: str, 
+        file_id: str, 
+        name = None, 
+        age = None, 
+        hobbies = None, 
+        gender = None
+    ):
         """Some docs"""
         session.merge(Concats(
                 user_id = user_id,
@@ -87,3 +108,19 @@ class Database:
         ).first()
 
         return response
+
+    def get_promocode_status(self, code) -> Promocodes:
+        """Some docs"""
+        response = session.query(Promocodes).filter(
+            Promocodes.code == code,
+        ).first()
+
+        return response 
+
+    def update_promo_to_expired(self, code):
+        """Some changes"""
+        session.execute(
+                update(Promocodes).filter(Promocodes.code == code).
+                values(status = True)
+        )
+        session.commit()

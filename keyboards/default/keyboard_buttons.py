@@ -1,6 +1,14 @@
 from aiogram import types
 
 
+def send_contact():
+    menu = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton(text="Отправить контакт", request_contact=True)
+    menu.add(btn1)
+
+    return menu
+
+
 def main_menu():
     pass
     # menu = types.ReplyKeyboardMarkup(resize_keyboard=True)

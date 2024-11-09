@@ -10,7 +10,7 @@ from keyboards.inline import inline_buttons
 @dp.message_handler(CommandStart(), state='*')
 async def bot_start(message: types.Message, state: FSMContext):
     await state.finish()
-    db.reg_user(message.from_user.id, message.from_user.username)
+    
     await message.answer_photo(
         photo='AgACAgIAAxkBAAIqNWcgpl8L5EP3XYDpAAGUNYiLvF6h6gACOuYxG7ubAAFJ7G4lw5UUVJEBAAMCAAN4AAM2BA',
         caption  =  "Сотворите Новогоднее чудо для ребёнка. "
