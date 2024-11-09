@@ -24,6 +24,10 @@ async def process_get_name(message: types.Message, state: FSMContext):
         'Саша', 'Сашенька', 'Шура', 'Шурочка', 'Валя', 'Валечка', 'Валюша', 'Вася', 'Женя', 'Женечка'
     ]
 
+    m_names = list(vid.name_m.keys())
+    w_names = list(vid.name_w.keys())
+    all_names = m_names.extend(w_names)
+
     if not cyrillic_checker.all_ru(message.text):
         await message.answer("Только кириллицей!")
 
@@ -31,7 +35,7 @@ async def process_get_name(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data['name'] = message.text.title()
 
-        if message.text.title() in u_names:
+        if message.text.title() in u_names or message.text.title() not in all_names:
             await message.answer("Уточняю, это мужское или женское имя?", reply_markup=inline_buttons.m_or_w())
             await RegOneChild.additive.set()
 
@@ -72,10 +76,10 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
         data['gender'] = c.data
 
         if c.data == 'male':
-            data['name'] = m_names[data['name']]
+            data['name'] = m_names.get(data['name'])
 
         else:
-            data['name'] = f_names[data['name']]
+            data['name'] = f_names.get(data['name'])
 
     await c.message.delete()
     await c.message.answer("Введите возраст:")
@@ -127,6 +131,9 @@ async def process_get_wishes(c: types.CallbackQuery, state: FSMContext):
 async def process_get_phone_number(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone_number'] = message.contact.phone_number
+
+    msg = await message.answer(".")
+    await msg.delete()
     
     await message.answer(
         "Регистрация завершена, нажмите на кнопку чтобы продолжить:",
@@ -171,7 +178,7 @@ async def process_promocode(c: types.CallbackQuery, state: FSMContext):
     )
 
     if await kassa.check_payment(payment_id):
-        process_send_result(c, state)
+        process_send_result(c.message, state)
 
     await RegOneChild.next()
 
@@ -211,7 +218,7 @@ async def process_send_result(message: types.Message, state: FSMContext):
     task = asyncio.create_task(show_process(msg))
 
     async with state.proxy() as data:
-        name = data.get('name')
+        name = data.get('name') if data.get('name') else 'no_name'
         gender = data.get('gender')
         age = data.get('age')
         hobbies = data.get('hobbies')
@@ -225,13 +232,18 @@ async def process_send_result(message: types.Message, state: FSMContext):
     bot_info = await bot.get_me()
     response = db.get_concat_one(name, gender, age, hobbies, wishes, bot_info.username)
     
-    if response:
+    if name == 'no_name':
+        caption = "Поздравление от Дедушки Мороза\n" \
+                "В словарном запасе Дедушки мороза не было имени, которое вы назвали. " \
+                "Но он всё равно записал новогоднее поздравление. Нажмите на видео, чтобы посмотреть.\n\n"
+    else:
+        caption = f"Поздравление для {name}\n" \
+                    "Скорее запускайте и смотрите!\n\n"
+        
+    if response:            
         await message.answer_video(
-            video = response.file_id, 
-            caption= "Поздравление от Дедушки Мороза\n"
-                    "В словарном запасе Дедушки мороза не было имени, которое вы назвали. Но он всё равно записал новогоднее поздравление. Нажмите на видео, чтобы посмотреть.\n\n"
-
-                    "Поделиться новогодним чудом с друзьями:"
+            video = response.file_id,
+            caption= caption
         )
         await state.finish()
 
@@ -243,10 +255,7 @@ async def process_send_result(message: types.Message, state: FSMContext):
             with open(video_url, 'rb') as video:
                 sended = await message.answer_video(
                     video = video,
-                    caption =  f"Поздравление для {name}\n"
-                                "Скорее запускайте и смотрите!\n\n"
-
-                                "Поделиться новогодним чудом с друзьями:"
+                    caption = caption
                 )
 
             os.remove(video_url)

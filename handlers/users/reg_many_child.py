@@ -102,7 +102,7 @@ async def process_promocode(c: types.CallbackQuery, state: FSMContext):
     )
 
     if await kassa.check_payment(payment_id):
-        process_send_result(c, state)
+        process_send_result(c.message, state)
         await state.finish()
 
     # await RegManyChild.next()
