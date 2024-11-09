@@ -92,7 +92,7 @@ async def process_promocode(c: types.CallbackQuery, state: FSMContext):
     await c.answer()
 
     kassa = YooKassa()
-    payment_details = kassa.payment_create(value=90, description="For video generation")
+    payment_details = kassa.payment_create(value=1, description="For video generation")
     payment_url = payment_details['confirmation']['confirmation_url']
     payment_id = payment_details['id']
 

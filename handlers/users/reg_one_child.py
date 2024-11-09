@@ -26,7 +26,8 @@ async def process_get_name(message: types.Message, state: FSMContext):
 
     m_names = list(vid.name_m.keys())
     w_names = list(vid.name_w.keys())
-    all_names = m_names.extend(w_names)
+    m_names.extend(w_names)
+    all_names = m_names
 
     if not cyrillic_checker.all_ru(message.text):
         await message.answer("Только кириллицей!")
@@ -168,7 +169,7 @@ async def process_promocode(c: types.CallbackQuery, state: FSMContext):
     await c.answer()
 
     kassa = YooKassa()
-    payment_details = kassa.payment_create(value=90, description="For video generation")
+    payment_details = kassa.payment_create(value=1, description="For video generation")
     payment_url = payment_details['confirmation']['confirmation_url']
     payment_id = payment_details['id']
 

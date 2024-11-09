@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy import create_engine
-from sqlalchemy import update, delete
+from sqlalchemy import update, delete, func
 from sqlalchemy.orm import sessionmaker
 
 from utils.db_api.base import Base
@@ -112,7 +112,7 @@ class Database:
     def get_promocode_status(self, code) -> Promocodes:
         """Some docs"""
         response = session.query(Promocodes).filter(
-            Promocodes.code == code,
+            func.lower(Promocodes.code) == func.lower(code),
         ).first()
 
         return response 
