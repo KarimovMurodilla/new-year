@@ -117,10 +117,10 @@ class Database:
 
         return response 
 
-    def update_promo_to_expired(self, code):
+    def update_promo_to_expired(self, code, user_id):
         """Some changes"""
         session.execute(
                 update(Promocodes).filter(Promocodes.code == code).
-                values(status = True)
+                values(status = True, user_id=user_id)
         )
         session.commit()

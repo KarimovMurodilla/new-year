@@ -182,7 +182,7 @@ async def process_get_promocode(message: types.Message, state: FSMContext):
 
     if not promo.status:
         await process_send_result(message, state)
-        db.update_promo_to_expired(message.text)
+        db.update_promo_to_expired(message.text, message.from_user.id)
     
     else:
         await message.answer(
