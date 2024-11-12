@@ -13,8 +13,11 @@ async def bot_start(message: types.Message, state: FSMContext):
     
     await message.answer_photo(
         photo='AgACAgIAAxkBAAIqNWcgpl8L5EP3XYDpAAGUNYiLvF6h6gACOuYxG7ubAAFJ7G4lw5UUVJEBAAMCAAN4AAM2BA',
-        caption  =  "Сотворите Новогоднее чудо для ребёнка. "
-                    "Я помогу за пару секунд создать именное поздравление от Дедушки Мороза и это как в сказке – абсолютно БЕСПЛАТНО! "
-                    "Только расскажи немного про адресата, чтобы пожелания попали в самое сердечко ❤",
+        caption  =  "Сотворите Новогоднее чудо для ребёнка.\n"
+                    "Я помогу за пару секунд создать именное "
+                    "поздравление от Дедушки Мороза и это как "
+                    "личный	звонок с Северного Полюса!\n"
+                    "Только	расскажи немного про адресата, чтобы "
+                    "пожелания попали в самое сердечко ❤",
                         reply_markup=inline_buttons.create_congrats()
     )

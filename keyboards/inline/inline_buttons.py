@@ -64,19 +64,12 @@ def m_or_w():
     return menu
 
 
-def show_paytypes():
+def show_paytypes(url: str):
     menu = types.InlineKeyboardMarkup(row_width=1)
     btn1 = types.InlineKeyboardButton(text="Да, ввести промокод", callback_data="promo")
-    btn2 = types.InlineKeyboardButton(text="Нет, перейти к оплате (90₽)", callback_data="yookassa")
+    btn2 = types.InlineKeyboardButton(text="Нет, перейти к оплате (90₽)", url=url)
     btn3 = types.InlineKeyboardButton(text="Wildberries", callback_data="wildberries")
     menu.add(btn1, btn2, btn3)
 
     return menu
 
-
-def show_yookassa_payment(url: str):
-    menu = types.InlineKeyboardMarkup(row_width=1)
-    btn2 = types.InlineKeyboardButton(text="Перейти к оплате (90₽)", url=url)
-    menu.add(btn2)
-
-    return menu

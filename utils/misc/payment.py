@@ -18,7 +18,7 @@ class YooKassa:
                 "currency": "RUB"
             },
             "payment_method_data": {
-                "type": "bank_card"
+                "type": "sbp"
             },
             "confirmation": {
                 "type": "redirect",
@@ -62,7 +62,9 @@ class YooKassa:
 
     async def check_payment(self, payment_id: str):
         payment = json.loads((Payment.find_one(payment_id)).json())
+        print("payment status:", payment['status'])
         while payment['status'] == 'pending':
+            print("Payment status inside while loop:", payment['status'])
             payment = json.loads((Payment.find_one(payment_id)).json())
             await asyncio.sleep(3)
 
