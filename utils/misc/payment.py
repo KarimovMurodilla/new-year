@@ -70,3 +70,6 @@ class YooKassa:
 
         if payment['status']=='succeeded':
             return True
+        
+        if payment['status']=='canceled':
+            return False     

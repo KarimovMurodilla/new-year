@@ -105,8 +105,8 @@ class YooKassa:
 
 
 kassa = YooKassa()
-res = kassa.payment_create(1, "test")
-# res = kassa.check_payment("2ec40288-000f-5000-8000-109bfde64084")
+# res = kassa.payment_create(1, "test")
+res = kassa.check_payment("2ec4f427-000f-5000-8000-17138f180427")
 pprint(res)
 
 
