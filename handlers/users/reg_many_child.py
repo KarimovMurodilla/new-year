@@ -56,6 +56,8 @@ async def process_show_paytypes_to_many(c: types.CallbackQuery, state: FSMContex
     payment_url = payment_details['confirmation']['confirmation_url']
     payment_id = payment_details['id']
 
+    async with state.proxy() as data:
+        data['payment_url'] = payment_url
 
     await c.message.answer(
         "У вас есть промокод? "	
@@ -87,11 +89,12 @@ async def process_get_promocode(message: types.Message, state: FSMContext):
         db.update_promo_to_expired(message.text, message.from_user.id)
     
     else:
+        data = await state.get_data()
         await message.answer(
             "Промокод недействителен. "
             "Пожалуйста, проверьте его и "	
             "попробуйте	снова!",
-            reply_markup=inline_buttons.show_paytypes()
+            reply_markup=inline_buttons.show_paytypes(url=data['payment_url'])
         )
         await state.set_state(RegManyChild.step3)
 
