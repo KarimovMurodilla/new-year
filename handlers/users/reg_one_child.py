@@ -159,11 +159,11 @@ async def process_show_paytypes(c: types.CallbackQuery, state: FSMContext):
     )
 
     task = asyncio.create_task(kassa.check_payment(payment_id))
+    
+    await RegOneChild.next()
 
     if await task:
         await process_send_result(c.message, state)
-
-    await RegOneChild.next()
 
 
 @dp.callback_query_handler(lambda c: c.data == 'promo', state=RegOneChild.step7)
