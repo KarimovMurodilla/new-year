@@ -151,9 +151,6 @@ async def process_show_paytypes(c: types.CallbackQuery, state: FSMContext):
     payment_url = payment_details['confirmation']['confirmation_url']
     payment_id = payment_details['id']
 
-    async with state.proxy() as data:
-        data['payment_url'] = payment_url
-
     await c.message.answer(
         "У вас есть промокод? "	
         "(промокод расположен на тыльной "
@@ -162,6 +159,9 @@ async def process_show_paytypes(c: types.CallbackQuery, state: FSMContext):
     )
 
     task = asyncio.create_task(kassa.check_payment(payment_id))
+
+    async with state.proxy() as data:
+        data['payment_url'] = payment_url
 
     await RegOneChild.next()
 
@@ -177,11 +177,20 @@ async def process_promocode(c: types.CallbackQuery, state: FSMContext):
     await RegOneChild.next()
 
 
+async def cancel_task(task):
+    print("Cancelling the task...")
+    task.cancel()
+    try:
+        await task  # Wait for the task to handle cancellation
+    except asyncio.CancelledError:
+        print("Task has been cancelled successfully.")
+
+
 @dp.message_handler(state=RegOneChild.step8)
 async def process_get_promocode(message: types.Message, state: FSMContext):
     promo = db.get_promocode_status(message.text)
 
-    if not promo.status:
+    if promo and not promo.status:
         await process_send_result(message, state)
         db.update_promo_to_expired(message.text, message.from_user.id)
 
