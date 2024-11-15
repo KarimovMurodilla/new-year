@@ -133,7 +133,7 @@ async def process_get_phone_number(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone_number'] = message.contact.phone_number
 
-    msg = await message.answer(".")
+    msg = await message.answer(".", reply_markup=types.ReplyKeyboardRemove())
     await msg.delete()
     
     await message.answer(
@@ -159,7 +159,7 @@ async def process_show_paytypes(c: types.CallbackQuery, state: FSMContext):
     )
 
     task = asyncio.create_task(kassa.check_payment(payment_id))
-    
+
     await RegOneChild.next()
 
     if await task:

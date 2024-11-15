@@ -37,7 +37,7 @@ async def process_get_phone_number(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone_number'] = message.contact.phone_number
     
-    msg = await message.answer(".")
+    msg = await message.answer(".", reply_markup=types.ReplyKeyboardRemove())
     await msg.delete()
 
     await message.answer(
@@ -64,10 +64,10 @@ async def process_show_paytypes_to_many(c: types.CallbackQuery, state: FSMContex
             reply_markup=inline_buttons.show_paytypes(url=payment_url)
     )
 
+    await RegManyChild.next()
+
     if await kassa.check_payment(payment_id):
         await process_send_result(c.message, state)
-
-    await RegManyChild.next()
 
 
 @dp.callback_query_handler(lambda c: c.data == 'promo', state=RegManyChild.step4)
@@ -94,27 +94,6 @@ async def process_get_promocode(message: types.Message, state: FSMContext):
             reply_markup=inline_buttons.show_paytypes()
         )
         await state.set_state(RegManyChild.step3)
-
-
-@dp.callback_query_handler(lambda c: c.data == 'yookassa', state=RegManyChild.step4)
-async def process_promocode(c: types.CallbackQuery, state: FSMContext):
-    await c.answer()
-
-    kassa = YooKassa()
-    payment_details = kassa.payment_create(value=1, description="For video generation")
-    payment_url = payment_details['confirmation']['confirmation_url']
-    payment_id = payment_details['id']
-
-    await c.message.answer(
-        "Чтобы оплатить, переходите на страницу оплаты по указанной кнопки",
-        reply_markup=inline_buttons.show_yookassa_payment(payment_url)
-    )
-
-    if await kassa.check_payment(payment_id):
-        process_send_result(c.message, state)
-        await state.finish()
-
-    # await RegManyChild.next()
 
 
 async def show_process(message: types.Message):
