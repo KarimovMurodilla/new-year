@@ -4,7 +4,7 @@ from aiogram import types
 def create_congrats():
     menu = types.InlineKeyboardMarkup(row_width=1)
     btn1 = types.InlineKeyboardButton(text="СОЗДАТЬ ПОЗДРАВЛЕНИЕ", callback_data="create")
-    btn2 = types.InlineKeyboardButton(text="Политика конфиденциальности", url="https://telegra.ph/Vot-tak-11-09")
+    btn2 = types.InlineKeyboardButton(text="ИНСТРУКЦИЯ", url="https://telegra.ph/Vot-tak-11-09")
     menu.add(btn1, btn2)
 
     return menu
