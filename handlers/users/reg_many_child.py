@@ -89,14 +89,11 @@ async def process_get_promocode(message: types.Message, state: FSMContext):
         db.update_promo_to_expired(message.text, message.from_user.id)
     
     else:
-        data = await state.get_data()
         await message.answer(
             "Промокод недействителен. "
             "Пожалуйста, проверьте его и "	
-            "попробуйте	снова!",
-            reply_markup=inline_buttons.show_paytypes(url=data['payment_url'])
+            "попробуйте	снова!"
         )
-        await state.set_state(RegManyChild.step3)
 
 
 async def show_process(message: types.Message):
@@ -127,7 +124,8 @@ async def process_send_result(message: types.Message, state: FSMContext):
         return await message.answer_video(
             video = response.file_id, 
             caption= "Дедушка Морозvзаписал видеопоздравление. "
-                        "Скорее запускайте и смотрите!"
+                        "Скорее запускайте и смотрите!",
+            reply_markup=inline_buttons.share_button()
         )
 
     video_url = vid.generate_video_for_many_child(BASE_DIR, wishes, message.from_user.id)
@@ -137,7 +135,8 @@ async def process_send_result(message: types.Message, state: FSMContext):
             result = await message.answer_video(
                 video = video, 
                 caption= "Дедушка Морозvзаписал видеопоздравление. "
-                        "Скорее запускайте и смотрите!"
+                        "Скорее запускайте и смотрите!",
+                reply_markup=inline_buttons.share_button()
             )
 
         os.remove(video_url)

@@ -177,15 +177,6 @@ async def process_promocode(c: types.CallbackQuery, state: FSMContext):
     await RegOneChild.next()
 
 
-async def cancel_task(task):
-    print("Cancelling the task...")
-    task.cancel()
-    try:
-        await task  # Wait for the task to handle cancellation
-    except asyncio.CancelledError:
-        print("Task has been cancelled successfully.")
-
-
 @dp.message_handler(state=RegOneChild.step8)
 async def process_get_promocode(message: types.Message, state: FSMContext):
     promo = db.get_promocode_status(message.text)
@@ -195,14 +186,11 @@ async def process_get_promocode(message: types.Message, state: FSMContext):
         db.update_promo_to_expired(message.text, message.from_user.id)
 
     else:
-        data = await state.get_data()
         await message.answer(
             "Промокод недействителен. "
             "Пожалуйста, проверьте его и "
-            "попробуйте	снова!",
-            reply_markup=inline_buttons.show_paytypes(url=data['payment_url'])
+            "попробуйте	снова!"
         )
-        await state.set_state(RegOneChild.step7)
  
 
 async def show_process(message: types.Message):
@@ -241,13 +229,13 @@ async def process_send_result(message: types.Message, state: FSMContext):
                 "В словарном запасе Дедушки мороза не было имени, которое вы назвали. " \
                 "Но он всё равно записал новогоднее поздравление. Нажмите на видео, чтобы посмотреть.\n\n"
     else:
-        caption = f"Поздравление для {name}\n" \
-                    "Скорее запускайте и смотрите!\n\n"
+        caption = "Скорее запускайте и смотрите!\n\n"
         
     if response:            
         await message.answer_video(
             video = response.file_id,
-            caption= caption
+            caption= caption,
+            reply_markup=inline_buttons.share_button()
         )
         await state.finish()
 
@@ -259,7 +247,8 @@ async def process_send_result(message: types.Message, state: FSMContext):
             with open(video_url, 'rb') as video:
                 sended = await message.answer_video(
                     video = video,
-                    caption = caption
+                    caption = caption,
+                    reply_markup=inline_buttons.share_button()
                 )
 
             os.remove(video_url)

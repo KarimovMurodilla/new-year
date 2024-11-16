@@ -2,9 +2,10 @@ from aiogram import types
 
 
 def create_congrats():
-    menu = types.InlineKeyboardMarkup()
+    menu = types.InlineKeyboardMarkup(row_width=1)
     btn1 = types.InlineKeyboardButton(text="СОЗДАТЬ ПОЗДРАВЛЕНИЕ", callback_data="create")
-    menu.add(btn1)
+    btn2 = types.InlineKeyboardButton(text="Политика конфиденциальности", url="https://telegra.ph/Vot-tak-11-09")
+    menu.add(btn1, btn2)
 
     return menu
 
@@ -73,3 +74,10 @@ def show_paytypes(url: str):
 
     return menu
 
+
+def share_button():
+    menu = types.InlineKeyboardMarkup(row_width=1)
+    btn1 = types.InlineKeyboardButton(text="Поделиться", url="https://t.me/share/url?url=Сотворите%20Новогоднее%20чудо%20для%20ребёнка.%20Попробуйте%20сейчас:%20@MorozRuBot")
+    menu.add(btn1)
+
+    return menu
