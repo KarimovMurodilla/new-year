@@ -69,7 +69,7 @@ def show_paytypes(url: str):
     menu = types.InlineKeyboardMarkup(row_width=1)
     btn1 = types.InlineKeyboardButton(text="Да, ввести промокод", callback_data="promo")
     btn2 = types.InlineKeyboardButton(text="Нет, перейти к оплате (90₽)", url=url)
-    btn3 = types.InlineKeyboardButton(text="Wildberries", callback_data="wildberries")
+    btn3 = types.InlineKeyboardButton(text="Wildberries", url="https://www.wildberries.ru/catalog/278224493/detail.aspx?targetUrl=GP&utm_source=TG&utm_medium=TGBOT&utm_campaign=4104188-id-MorozRU&utm_term=otkrytka&utm_content=bot")
     menu.add(btn1, btn2, btn3)
 
     return menu

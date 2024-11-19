@@ -147,8 +147,8 @@ class VideoEdit():
 
         self.wishes = {
             'obey_parents': 'Wishes_01.mp4',
-            'good_to_eat': 'Wishes_02.mp4',
-            'study_well': 'Wishes_03.mp4',
+            'good_to_eat': 'Wishes_03.mp4',
+            'study_well': 'Wishes_02.mp4',
             'find_new_friends': 'Wishes_04.mp4',
             'read_more_books': 'Wishes_05.mp4',
         }
